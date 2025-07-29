@@ -1,0 +1,329 @@
+/* --- Global, Background, and NEW FONT --- */
+body {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #111;
+    background-color: #A3D5FF;
+    background-image:
+        linear-gradient(45deg, #F7D9E3 25%, transparent 25%),
+        linear-gradient(-45deg, #F7D9E3 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #F7D9E3 75%),
+        linear-gradient(-45deg, transparent 75%, #F7D9E3 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size:10px;'><path d='M0,0 L0,28 L21,14 Z' style='fill:%23111;stroke:%23fff;stroke-width:1.5px;'/></svg>") 0 0, auto;
+    touch-action: none;
+}
+
+/* --- CSS-ONLY PIXEL STARFIELD --- */
+.stars {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-repeat: repeat;
+    animation: shine-and-move linear infinite;
+}
+#stars1 { background-image: radial-gradient(1px 1px at 20px 30px, #fff, transparent), radial-gradient(1px 1px at 50px 80px, #fff, transparent); background-size: 200px 200px; animation-duration: 200s; }
+#stars2 { background-image: radial-gradient(1px 1px at 40px 60px, #fff, transparent), radial-gradient(1px 1px at 120px 150px, #fff, transparent); background-size: 300px 300px; animation-duration: 150s; }
+#stars3 { background-image: radial-gradient(2px 2px at 80px 40px, #fff, transparent), radial-gradient(2px 2px at 160px 120px, #fff, transparent); background-size: 250px 250px; animation-duration: 100s; }
+@keyframes shine-and-move { from { background-position: 0 0; opacity: 0.8; } 50% { opacity: 1; } to { background-position: -10000px 5000px; opacity: 0.8; } }
+
+/* --- Screen Wrappers --- */
+#entry-wrapper { display: flex; align-items: center; justify-content: center; height: 100%; }
+#desktop-wrapper { display: none; height: 100%; width: 100%; }
+
+/* --- ENHANCED TASKBAR --- */
+.taskbar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 36px;
+    background-color: #EAEAEA; border-top: 2px solid #111;
+    padding: 0 5px; display: flex; align-items: center; z-index: 5000; gap: 6px;
+}
+.start-button {
+    padding: 4px 12px; font-weight: bold; border: 2px solid #111; background: #FFB3C1;
+    color: #111; border-radius: 6px; box-shadow: 3px 3px 0 #111;
+    transition: all 0.1s ease-out; font-size: 10px;
+}
+.start-button:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #111; }
+.start-button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #111; }
+#taskbar-windows { display: flex; gap: 4px; height: 100%; align-items: center; }
+.taskbar-tab {
+    display: flex; align-items: center; justify-content: center;
+    height: 28px; width: 32px; padding: 0; border: 2px solid #111;
+    background: #EAEAEA; color: #111;
+    border-radius: 6px; box-shadow: 2px 2px 0 #111; font-size: 10px;
+    overflow: hidden;
+}
+.taskbar-tab .icon-visual, .taskbar-tab .icon-visual img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+.taskbar-tab.active { background: #DCDCDC; box-shadow: inset 2px 2px 0 #11111188; border-style: solid; }
+.clock {
+    margin-left: auto; padding: 4px 8px;
+    background: #111; color: #9BF6FF;
+    border: 2px solid #111; border-radius: 4px;
+    box-shadow: inset 2px 2px 0 #00000088; font-size: 10px;
+}
+
+/* --- WINDOWS: New Chunky, Drawn Style --- */
+.window {
+    background: #EAEAEA; border: 2px solid #111;
+    box-shadow: 6px 6px 0px #111; border-radius: 8px;
+    padding: 3px; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 90%; max-width: 400px;
+    display: none; z-index: 1000;
+    animation: openWindow 0.3s ease-out;
+}
+@keyframes openWindow { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+#password-window { display: block; }
+.title-bar {
+    background: transparent; color: #111; padding: 5px 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: normal; user-select: none; border-bottom: 2px solid #111;
+    font-size: 10px;
+}
+.title-bar-controls { display: flex; gap: 5px; }
+.title-bar-controls button {
+     width: 14px; height: 14px; min-height: 14px;
+     background-color: transparent; border: 2px solid #111;
+     border-radius: 50%; padding: 0;
+}
+.close-button::before { display: none; }
+.window-body {
+    background-color: #F0F0F0; color: #111;
+    padding: 10px 20px; margin: 3px;
+    border: none; box-shadow: inset 1px 1px 2px #00000022;
+    max-height: 60vh; overflow-y: auto; line-height: 1.8;
+}
+.window-body p { margin: 1.5em 0; }
+
+.window-body::-webkit-scrollbar { width: 16px; }
+.window-body::-webkit-scrollbar-track { background: #DCDCDC; border-left: 2px solid #111; }
+.window-body::-webkit-scrollbar-thumb { background-color: #B0B0B0; border: 2px solid #111; border-radius: 4px; }
+
+/* --- Entry Screen & Action Buttons --- */
+.riddle { margin-top: 0; line-height: 1.8; }
+#password-form input[type="text"] {
+    width: calc(100% - 20px); padding: 8px 10px; margin-bottom: 10px;
+    border: 2px solid #111; font-family: 'Press Start 2P', monospace;
+    font-size: 10px; background: #fff;
+}
+.action-button {
+    padding: 10px 20px; font-family: 'Press Start 2P', monospace; font-size: 10px;
+    background: #EAEAEA; border: 3px outset #111; box-shadow: 4px 4px 0 #111;
+    transition: all 0.1s ease-out;
+}
+.action-button:hover { background: #f5f5f5; }
+.action-button:active { border-style: inset; transform: translate(4px, 4px); box-shadow: none; }
+.error-message { color: #FF3B30; margin-bottom: 10px; font-weight: bold; display: none; }
+
+/* --- Container for Draggable Icons --- */
+#desktop-icons-container {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: calc(100% - 36px); z-index: 1;
+}
+
+/* --- DRAGGABLE & FLOATING ICONS --- */
+.desktop-icon {
+    position: absolute; width: 90px; text-align: center;
+    animation-iteration-count: infinite; animation-timing-function: ease-in-out;
+    animation-direction: alternate; user-select: none;
+}
+.desktop-icon.dragging { animation-play-state: paused; z-index: 100; transform: scale(1.1); }
+
+@keyframes float1 { from { transform: translate(0, 0); } to { transform: translate(15px, 20px); } }
+@keyframes float2 { from { transform: translate(0, 0); } to { transform: translate(-18px, 12px); } }
+@keyframes float3 { from { transform: translate(0, 0); } to { transform: translate(12px, -15px) rotate(8deg); } }
+@keyframes float4 { from { transform: translate(0, 0); } to { transform: translate(-10px, -18px) rotate(-8deg); } }
+@keyframes float5 { 0% { transform: translateY(5px); } 25% { transform: translateX(-5px); } 50% { transform: translateY(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateY(5px); } }
+@keyframes float6 { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+.desktop-icon:hover { background: rgba(163, 213, 255, 0.7); border-radius: 8px; }
+.desktop-icon .icon-visual {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.desktop-icon .icon-visual img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+.desktop-icon .icon-label {
+    margin-top: 8px; color: #333;
+    text-shadow: 1px 1px 0px #fff;
+    word-wrap: break-word; font-size: 10px; line-height: 1.4;
+}
+.desktop-icon:hover .icon-label { background: rgba(0, 0, 128, 0.7); color: #fff; text-shadow: none; border-radius: 4px; }
+
+.starlight-materialize { animation: starlight-materialize 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+@keyframes starlight-materialize { 0% { opacity: 0; transform: scale(0.5); filter: blur(10px) drop-shadow(0 0 20px #fff); } 60% { opacity: 1; filter: blur(2px) drop-shadow(0 0 10px #D4AF37); } 100% { opacity: 1; transform: scale(1); filter: blur(0) drop-shadow(0 0 0px transparent); } }
+
+/* --- Popups & Video --- */
+.memory-popup { max-width: 350px; }
+.popup-visual {
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px;
+}
+.popup-visual img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+}
+.popup-text { line-height: 1.8; text-align: left; }
+
+/* --- ENHANCED FINAL POPUP & RETRO AUDIO CONTROLS --- */
+.final-popup-special {
+    width: 90%; max-width: 650px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border: 3px solid #FFB3C1;
+    box-shadow: 0 0 20px rgba(255, 179, 193, 0.3), 8px 8px 0px #111;
+}
+.final-popup-special .title-bar {
+    background: linear-gradient(90deg, #FFB3C1, #F7D9E3);
+    color: #111; border-color: #111;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+}
+.final-popup-special .window-body {
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    color: #EAEAEA;
+    border: 2px inset #333;
+}
+.final-popup-special .close-button {
+    border-color: #FFB3C1;
+    background: #FFB3C1;
+}
+
+#lyric-display {
+    width: 100%; min-height: 100px; display: flex; justify-content: center;
+    align-items: center; text-align: center; font-size: 20px;
+    line-height: 1.7; color: #EAEAEA; margin-bottom: 25px;
+    background: linear-gradient(45deg, #0a0a0a, #1a1a1a);
+    border: 2px inset #333; border-radius: 8px; padding: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+.lyric-line {
+    animation: fadeIn 0.5s forwards;
+    text-shadow: 0 0 5px rgba(255, 179, 193, 0.3);
+}
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* --- ENHANCED RETRO AUDIO CONTROLS --- */
+#custom-audio-controls {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 15px; box-sizing: border-box;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 2px outset #444; border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+#play-pause-button {
+    font-family: 'Press Start 2P', monospace; font-size: 10px;
+    width: 60px; height: 50px;
+    border: 3px outset #FFB3C1;
+    background: linear-gradient(135deg, #FFB3C1 0%, #F7D9E3 100%);
+    color: #111; border-radius: 8px;
+    box-shadow: 3px 3px 0 #111, inset 0 0 5px rgba(255,255,255,0.2);
+    transition: all 0.15s ease;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+}
+#play-pause-button:hover {
+    background: linear-gradient(135deg, #F7D9E3 0%, #FFB3C1 100%);
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 #111, inset 0 0 5px rgba(255,255,255,0.2);
+}
+#play-pause-button:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 #111, inset 2px 2px 5px rgba(0,0,0,0.3);
+}
+#play-pause-button.playing {
+    border-style: inset;
+    background: linear-gradient(135deg, #9BF6FF 0%, #A3D5FF 100%);
+    color: #111;
+}
+
+.time-display {
+    background: linear-gradient(135deg, #111 0%, #000 100%);
+    color: #9BF6FF; padding: 8px 12px;
+    font-size: 10px;
+    border: 2px inset #000; border-radius: 6px;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+    text-shadow: 0 0 3px rgba(155, 246, 255, 0.5);
+    font-weight: bold;
+}
+
+.progress-bar {
+    flex-grow: 1; height: 24px;
+    background: linear-gradient(135deg, #000 0%, #111 100%);
+    border: 2px inset #000; cursor: pointer; border-radius: 6px;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.7);
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #FFB3C1 0%, #F7D9E3 50%, #9BF6FF 100%);
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(255, 179, 193, 0.5);
+    transition: width 0.1s ease;
+}
+
+#soundcloud-player-container {
+    position: absolute;
+    left: -9999px; /* Hides the player off-screen */
+}
+
+/* --- Enhanced styling for password and birthday windows --- */
+.riddle em {
+    color: #FF6B9D;
+    font-style: normal;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+}
+
+@media (max-width: 600px) {
+    .window {
+        width: 95%;
+        max-width: none;
+    }
+
+    .desktop-icon {
+        width: 70px;
+    }
+
+    .desktop-icon .icon-visual, .desktop-icon .icon-visual img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .desktop-icon .icon-label {
+        font-size: 9px;
+    }
+
+    .final-popup-special {
+        width: 95%;
+    }
+
+    #lyric-display {
+        font-size: 16px;
+    }
+
+    #custom-audio-controls {
+        flex-wrap: wrap;
+    }
+
+    .progress-bar {
+        order: -1;
+        width: 100%;
+    }
+}
