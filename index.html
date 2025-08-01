@@ -482,12 +482,127 @@
             text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
         }
         
+        /* --- TIC-TAC-TOE GAME STYLES --- */
+        #xo-fullscreen-container {
+            --bg-color: #000;
+            --fg-color: #0f0; /* Classic green terminal */
+            --accent-color: #f0f;
+            --x-color: #0ff;
+            --o-color: #ff0;
+        }
+        #xo-fullscreen-container .window-body { /* This rule is likely not needed anymore as the game content is directly in the fullscreen container */
+            background-color: var(--bg-color);
+            color: var(--fg-color);
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+            overflow: hidden; /* Hide scrollbars */
+            position: relative; /* For the ::after pseudo-element */
+            padding: 20px;
+        }
+        #xo-fullscreen-container::after { /* Apply to the container itself */
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+        #xo-fullscreen-container .hidden { display: none !important; }
+        #xo-fullscreen-container .page { width: 100%; max-width: 500px; padding: 0; margin: 0 auto; }
+        #xo-fullscreen-container #xo-page1 h1 {
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px var(--fg-color);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        #xo-fullscreen-container .btn {
+            background-color: transparent;
+            border: 2px solid var(--fg-color);
+            color: var(--fg-color);
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        #xo-fullscreen-container .btn:hover { background-color: var(--fg-color); color: var(--bg-color); box-shadow: 0 0 10px var(--fg-color); }
+        #xo-fullscreen-container .btn:disabled { color: #555; border-color: #555; cursor: not-allowed; }
+        #xo-fullscreen-container #xo-game-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #xo-fullscreen-container #xo-status-display { font-size: 1rem; height: 30px; line-height: 1.5; }
+        #xo-fullscreen-container #xo-game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 4px; border: 2px solid var(--fg-color); padding: 4px; background-color: #111;
+        }
+        #xo-fullscreen-container .cell {
+            width: 80px; height: 80px;
+            background-color: var(--bg-color); border: 2px solid var(--fg-color);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3rem; cursor: pointer; user-select: none;
+        }
+        #xo-fullscreen-container .cell.X { color: var(--x-color); }
+        #xo-fullscreen-container .cell.O { color: var(--o-color); }
+        #xo-fullscreen-container .cell.selected { background-color: #333; border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
+        #xo-fullscreen-container .celebrate { animation: celebrate-anim 0.5s infinite; }
+        @keyframes celebrate-anim {
+            0% { color: var(--fg-color); text-shadow: 0 0 5px var(--fg-color); }
+            50% { color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); }
+            100% { color: var(--fg-color); text-shadow: 0 0 5px var(--fg-color); }
+        }
+        #xo-fullscreen-container #xo-piece-tracker { display: flex; justify-content: space-around; width: 100%; font-size: 0.8rem; }
+        #xo-fullscreen-container #xo-player-role-display { margin-top: 10px; font-size: 0.8rem; color: var(--accent-color); }
+
         /* --- MOBILE ADAPTIVE BACKGROUND --- */
         @media (max-width: 600px) {
             body {
                 background-size: 15px 15px;
                 background-position: 0 0, 0 7.5px, 7.5px -7.5px, -7.5px 0px;
             }
+        }
+
+        /* --- FULLSCREEN XO GAME --- */
+        #xo-fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: 'Press Start 2P', cursive;
+            color: #0f0;
+        }
+
+        #xo-fullscreen-container.hidden {
+            display: none;
+        }
+
+        .xo-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            z-index: 10001;
+        }
+        .xo-close-btn:hover {
+            background-color: #0f0;
+            color: #000;
         }
     </style>
 </head>
@@ -509,6 +624,7 @@
         <div class="window final-popup-special" id="final-popup"></div>
         <div class="window" id="chat-window"></div>
         <!-- NEW: Checklist Window -->
+        
         <div class="window" id="checklist-window"></div>
         <div class="window" id="add-memory-window"></div>
     </div>
@@ -516,6 +632,9 @@
         <div class="window" id="password-window"></div>
     </div>
     <div class="window" id="birthday-popup"></div>
+
+    <!-- Fullscreen XO Game Container -->
+    <div id="xo-fullscreen-container" class="hidden"></div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -621,11 +740,25 @@
             
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const userInput = passwordInput.value.trim().toLowerCase().replace(/'/g, "");
+                const rawInput = passwordInput.value.trim();
+
+                // Special check for the 'xo' game password
+                if (rawInput.toLowerCase() === 'xo') {
+                    closeWindowWithAnimation(passwordWindow, () => {
+                        entryWrapper.style.display = 'none';
+                        desktopWrapper.style.display = 'block';
+                        if (!isDesktopInitialized) {
+                            initializeDesktop(content);
+                        }
+                        openXOGameAsFullscreen();
+                    });
+                    return; // Stop further processing
+                }
+
+                const userInput = rawInput.toLowerCase().replace(/'/g, "");
                 const isValid = validPasswords.some(password => 
                     userInput === password.replace(/'/g, "")
                 );
-                
                 if (isValid) {
                     closeWindowWithAnimation(passwordWindow, () => {
                         openWindowWithAnimation(birthdayPopup);
@@ -950,6 +1083,17 @@
                     }
                 }
 
+                // Create the Tic-Tac-Toe icon
+                const xoIconData = {
+                    id: 1000, // Special ID for the game
+                    title: "X/O Game",
+                    visual: `<div style="font-size: 24px; font-weight: bold; color: #0f0; text-shadow: 0 0 5px #0f0;">X/O</div>`,
+                    position: { top: '75%', left: '25%' }
+                };
+                if (!document.querySelector(`.desktop-icon[data-memory-id="${xoIconData.id}"]`)) {
+                    createIcon(xoIconData, false);
+                }
+
                 initializeSoundCloudPlayer();
                 initializeChat();
                 initializeChecklist();
@@ -1011,6 +1155,218 @@
                             console.error('Error adding memory: ', error);
                             alert('Failed to add memory. Please try again.');
                         });
+                });
+            }
+
+            // --- TIC-TAC-TOE GAME ---
+            let isXOGameInitialized = false;
+            let xoMyPlayerRef = null; // Scoped variable for the game's player reference
+
+            function openXOGameAsFullscreen() {
+                const fullscreenContainer = document.getElementById('xo-fullscreen-container');
+                if (!isXOGameInitialized) {
+                    initializeXOGame(fullscreenContainer);
+                }
+                fullscreenContainer.classList.remove('hidden');
+            }
+
+            function hideXOGameAsFullscreen() {
+                const fullscreenContainer = document.getElementById('xo-fullscreen-container');
+                fullscreenContainer.classList.add('hidden');
+                // Disconnect player from Firebase when the game is closed
+                if (xoMyPlayerRef) {
+                    xoMyPlayerRef.remove();
+                    xoMyPlayerRef = null;
+                }
+            }
+
+            function initializeXOGame(container) {
+                if (isXOGameInitialized) return;
+                isXOGameInitialized = true;
+
+                container.innerHTML = `
+                    <button class="xo-close-btn">X</button>
+                    <div id="xo-page1" class="page">
+                        <h1>3-Piece<br>Tic-Tac-Toe</h1>
+                        <div id="xo-player-choice-buttons">
+                            <button id="xo-choose-x-btn" class="btn">Play as X</button>
+                            <button id="xo-choose-o-btn" class="btn">Play as O</button>
+                        </div>
+                    </div>
+                    <div id="xo-page2" class="page hidden">
+                        <div id="xo-game-container">
+                            <div id="xo-status-display">Player X's Turn</div>
+                            <div id="xo-piece-tracker">
+                                <div id="xo-x-pieces">X placed: 0</div>
+                                <div id="xo-o-pieces">O placed: 0</div>
+                            </div>
+                            <div id="xo-game-board">
+                                ${Array(9).fill(0).map((_, i) => `<div class="cell" data-cell-index="${i}"></div>`).join('')}
+                            </div>
+                            <button id="xo-next-round-btn" class="btn hidden">Next Round</button>
+                            <div id="xo-player-role-display"></div>
+                        </div>
+                    </div>
+                `;
+
+                container.querySelector('.xo-close-btn').addEventListener('click', hideXOGameAsFullscreen);
+
+                // --- Game Logic (adapted from xo.html) ---
+                const gameRef = database.ref('tic-tac-toe-game');
+                const playersRef = database.ref('tic-tac-toe-players');
+
+                const page1 = container.querySelector('#xo-page1');
+                const page2 = container.querySelector('#xo-page2');
+                const chooseXBtn = container.querySelector('#xo-choose-x-btn');
+                const chooseOBtn = container.querySelector('#xo-choose-o-btn');
+                const statusDisplay = container.querySelector('#xo-status-display');
+                const cells = container.querySelectorAll('.cell');
+                const nextRoundBtn = container.querySelector('#xo-next-round-btn');
+                const xPiecesDisplay = container.querySelector('#xo-x-pieces');
+                const oPiecesDisplay = container.querySelector('#xo-o-pieces');
+                const playerRoleDisplay = container.querySelector('#xo-player-role-display');
+
+                let localGameState = {};
+                let myRole = 'Spectator';
+                let selectedPieceIndex = null;
+
+                const winningConditions = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                    [0, 4, 8], [2, 4, 6]
+                ];
+
+                const handlePlayerAssignment = (chosenRole) => {
+                    playersRef.get().then((snapshot) => {
+                        const players = snapshot.val() || {};
+                        if (Object.values(players).some(p => p.role === chosenRole)) {
+                            alert(`Player ${chosenRole} is already taken!`);
+                            return;
+                        }
+                        
+                        myRole = chosenRole;
+                        xoMyPlayerRef = playersRef.push({ role: myRole });
+                        xoMyPlayerRef.onDisconnect().remove();
+
+                        page1.classList.add('hidden');
+                        page2.classList.remove('hidden');
+                        playerRoleDisplay.textContent = `You are Player ${myRole}`;
+
+                        if (myRole === 'X') {
+                            const initialGameState = {
+                                board: Array(9).fill(""),
+                                currentPlayer: Math.random() < 0.5 ? 'X' : 'O',
+                                piecesOnBoard: { 'X': 0, 'O': 0 },
+                                winner: null,
+                                gameActive: true
+                            };
+                            gameRef.set(initialGameState);
+                        }
+                    });
+                };
+
+                playersRef.on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    const roles = Object.values(players).map(p => p.role);
+                    chooseXBtn.disabled = roles.includes('X');
+                    chooseOBtn.disabled = roles.includes('O');
+                });
+
+                gameRef.on('value', (snapshot) => {
+                    localGameState = snapshot.val();
+                    if (localGameState) {
+                        updateUIFromState();
+                    }
+                });
+
+                const updateUIFromState = () => {
+                    if (!localGameState.board) return;
+
+                    cells.forEach((cell, index) => {
+                        cell.textContent = localGameState.board[index];
+                        cell.classList.remove('X', 'O', 'selected');
+                        if (localGameState.board[index]) {
+                            cell.classList.add(localGameState.board[index]);
+                        }
+                    });
+
+                    if (localGameState.winner) {
+                        statusDisplay.textContent = `Player ${localGameState.winner} Wins!`;
+                        statusDisplay.classList.add('celebrate');
+                        nextRoundBtn.classList.remove('hidden');
+                    } else if (!localGameState.gameActive) {
+                        statusDisplay.textContent = 'Game Over!';
+                        nextRoundBtn.classList.remove('hidden');
+                    } else {
+                        statusDisplay.textContent = `Player ${localGameState.currentPlayer}'s Turn`;
+                        statusDisplay.classList.remove('celebrate');
+                        nextRoundBtn.classList.add('hidden');
+                    }
+                    
+                    xPiecesDisplay.textContent = `X placed: ${localGameState.piecesOnBoard.X || 0}`;
+                    oPiecesDisplay.textContent = `O placed: ${localGameState.piecesOnBoard.O || 0}`;
+                };
+
+                const handleCellClick = (e) => {
+                    if (!localGameState.gameActive || myRole !== localGameState.currentPlayer) return;
+
+                    const clickedCellIndex = parseInt(e.target.getAttribute('data-cell-index'));
+                    const board = [...localGameState.board];
+                    const piecesOnBoard = {...localGameState.piecesOnBoard};
+
+                    if (piecesOnBoard[myRole] < 3) {
+                        if (board[clickedCellIndex] === "") {
+                            board[clickedCellIndex] = myRole;
+                            piecesOnBoard[myRole]++;
+                            updateGameState({ board, piecesOnBoard, currentPlayer: myRole === 'X' ? 'O' : 'X' });
+                        }
+                    } else {
+                        if (board[clickedCellIndex] === myRole) {
+                            if (selectedPieceIndex !== null) cells[selectedPieceIndex].classList.remove('selected');
+                            selectedPieceIndex = clickedCellIndex;
+                            cells[clickedCellIndex].classList.add('selected');
+                        } else if (board[clickedCellIndex] === "" && selectedPieceIndex !== null) {
+                            board[selectedPieceIndex] = "";
+                            board[clickedCellIndex] = myRole;
+                            selectedPieceIndex = null;
+                            updateGameState({ board, currentPlayer: myRole === 'X' ? 'O' : 'X' });
+                        }
+                    }
+                };
+
+                const updateGameState = (updates) => {
+                    const newGameState = { ...localGameState, ...updates };
+                    const winner = checkWin(newGameState.board);
+                    if (winner) {
+                        newGameState.winner = winner;
+                        newGameState.gameActive = false;
+                    }
+                    gameRef.set(newGameState);
+                };
+                
+                const checkWin = (board) => {
+                    for (const condition of winningConditions) {
+                        const [a, b, c] = condition;
+                        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                            return board[a];
+                        }
+                    }
+                    return null;
+                };
+
+                chooseXBtn.addEventListener('click', () => handlePlayerAssignment('X'));
+                chooseOBtn.addEventListener('click', () => handlePlayerAssignment('O'));
+                cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+                nextRoundBtn.addEventListener('click', () => {
+                    // Allow either player to start a new round
+                    const initialGameState = {
+                        board: Array(9).fill(""),
+                        currentPlayer: Math.random() < 0.5 ? 'X' : 'O',
+                        piecesOnBoard: { 'X': 0, 'O': 0 },
+                        winner: null,
+                        gameActive: true
+                    };
+                    gameRef.set(initialGameState);
                 });
             }
             
@@ -1096,6 +1452,8 @@
                     const memoryId = parseInt(draggedIcon.dataset.memoryId);
                     if (memoryId === 999) {
                         showFinalPopup();
+                    } else if (memoryId === 1000) {
+                        openXOGameAsFullscreen();
                     } else {
                         const memory = memories.find(m => m.id === memoryId);
                         if (memory) { openMemoryPopup(memory); }
@@ -1332,3 +1690,28 @@
     </script>
 </body>
 </html>
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+<environment_details>
+# VSCode Visible Files
+index.html
+
+# VSCode Open Tabs
+index.html
+
+# Recently Modified Files
+These files have been modified since you last accessed them (file was just edited so you may need to re-read it before editing):
+index.html
+
+# Current Time
+8/1/2025, 6:58:33 AM (Africa/Casablanca, UTC+1:00)
+
+# Context Window Usage
+183,287 / 1,048.576K tokens used (17%)
+
+# Current Mode
+ACT MODE
+</environment_details>
