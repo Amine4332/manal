@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daydreamin'</title>
+    
+    <!-- IMPORTING THE NEW RETRO FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Global, Background, and NEW FONT --- */
+        body {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            color: #EAEAEA;
+            background-color: #000;
+            
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size:10px;'><path d='M0,0 L0,28 L21,14 Z' style='fill:%23111;stroke:%23fff;stroke-width:1.5px;'/></svg>") 0 0, auto;
+            touch-action: none;
+        }
+
+        /* --- CSS-ONLY PIXEL STARFIELD --- */
+        .stars {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-repeat: repeat;
+            animation: shine-and-move linear infinite;
+        }
+        #stars1 { background-image: radial-gradient(1px 1px at 20px 30px, #fff, transparent), radial-gradient(1px 1px at 50px 80px, #fff, transparent); background-size: 200px 200px; animation-duration: 200s; }
+        #stars2 { background-image: radial-gradient(1px 1px at 40px 60px, #fff, transparent), radial-gradient(1px 1px at 120px 150px, #fff, transparent); background-size: 300px 300px; animation-duration: 150s; }
+        #stars3 { background-image: radial-gradient(2px 2px at 80px 40px, #fff, transparent), radial-gradient(2px 2px at 160px 120px, #fff, transparent); background-size: 250px 250px; animation-duration: 100s; }
+        @keyframes shine-and-move { from { background-position: 0 0; opacity: 0.8; } 50% { opacity: 1; } to { background-position: -10000px 5000px; opacity: 0.8; } }
+
+        /* --- Screen Wrappers --- */
+        #entry-wrapper { display: flex; align-items: center; justify-content: center; height: 100%; }
+        #desktop-wrapper { display: none; height: 100%; width: 100%; }
+        
+        /* --- ENHANCED TASKBAR --- */
+        .taskbar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 36px;
+            background-color: #EAEAEA; border-top: 2px solid #111;
+            padding: 0 5px; display: flex; align-items: center; z-index: 5000; gap: 6px;
+        }
+        .start-button {
+            padding: 4px 12px; font-weight: bold; border: 2px solid #111; background: #FFB3C1;
+            color: #111; border-radius: 6px; box-shadow: 3px 3px 0 #111;
+            transition: all 0.1s ease-out; font-size: 10px;
+        }
+        .start-button:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #111; }
+        .start-button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #111; }
+        #taskbar-windows { display: flex; gap: 4px; height: 100%; align-items: center; }
+        .taskbar-tab {
+            display: flex; align-items: center; justify-content: center;
+            height: 28px; width: 32px; padding: 0; border: 2px solid #111;
+            background: #EAEAEA; color: #111;
+            border-radius: 6px; box-shadow: 2px 2px 0 #111; font-size: 10px;
+            overflow: hidden;
+        }
+        .taskbar-tab .icon-visual, .taskbar-tab .icon-visual img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+        .taskbar-tab.active { background: #DCDCDC; box-shadow: inset 2px 2px 0 #11111188; border-style: solid; }
+        .clock {
+            margin-left: auto; padding: 4px 8px;
+            background: #111; color: #9BF6FF;
+            border: 2px solid #111; border-radius: 4px;
+            box-shadow: inset 2px 2px 0 #00000088; font-size: 10px;
+            cursor: pointer;
+        }
+        .clock:hover { background: #333; }
+
+        /* --- WINDOWS: New Chunky, Drawn Style --- */
+        .window {
+            background: #EAEAEA; border: 2px solid #111;
+            box-shadow: 6px 6px 0px #111; border-radius: 8px;
+            padding: 3px; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 400px;
+            display: none; z-index: 1000;
+        }
+        /* macOS-like animations */
+        .window.opening {
+            animation: macOpen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .window.closing-centered {
+            animation: macCloseCentered 0.3s cubic-bezier(0.47, 0, 0.75, 0.72) forwards;
+        }
+        .window.closing-dragged {
+            animation: macCloseDragged 0.3s cubic-bezier(0.47, 0, 0.75, 0.72) forwards;
+        }
+        @keyframes macOpen {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes macCloseCentered {
+            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+        }
+        @keyframes macCloseDragged {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.7); }
+        }
+        #password-window { display: block; }
+        .title-bar { 
+            background: transparent; color: #111; padding: 5px 8px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-weight: normal; user-select: none; border-bottom: 2px solid #111; cursor: grab;
+            font-size: 10px;
+        }
+        .title-bar-controls { display: flex; gap: 5px; }
+        .title-bar-controls button {
+             width: 14px; height: 14px; min-height: 14px; 
+             background-color: transparent; border: 2px solid #111;
+             border-radius: 50%; padding: 0;
+        }
+        .close-button::before { display: none; }
+        .window.dragging .title-bar {
+            cursor: grabbing;
+        }
+
+        .window-body { 
+            background-color: #F0F0F0; color: #111;
+            padding: 10px 20px; margin: 3px;
+            border: none; box-shadow: inset 1px 1px 2px #00000022;
+            max-height: 60vh; overflow-y: auto; line-height: 1.8;
+        }
+        .window-body p { margin: 1.5em 0; }
+
+        .window-body::-webkit-scrollbar { width: 16px; }
+        .window-body::-webkit-scrollbar-track { background: #DCDCDC; border-left: 2px solid #111; }
+        .window-body::-webkit-scrollbar-thumb { background-color: #B0B0B0; border: 2px solid #111; border-radius: 4px; }
+
+        /* --- Entry Screen & Action Buttons --- */
+        .riddle { margin-top: 0; line-height: 1.8; }
+        #password-form input[type="text"] { 
+            width: calc(100% - 20px); padding: 8px 10px; margin-bottom: 10px; 
+            border: 2px solid #111; font-family: 'Press Start 2P', monospace; 
+            font-size: 10px; background: #fff;
+        }
+        .action-button {
+            padding: 10px 20px; font-family: 'Press Start 2P', monospace; font-size: 10px;
+            background: #EAEAEA; border: 3px outset #111; box-shadow: 4px 4px 0 #111;
+            transition: all 0.1s ease-out;
+        }
+        .action-button:hover { background: #f5f5f5; }
+        .action-button:active { border-style: inset; transform: translate(4px, 4px); box-shadow: none; }
+        .error-message { color: #FF3B30; margin-bottom: 10px; font-weight: bold; display: none; }
+
+        /* --- Container for Draggable Icons --- */
+        #desktop-icons-container {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: calc(100% - 36px); z-index: 1;
+        }
+
+        /* --- DRAGGABLE & FLOATING ICONS --- */
+        .desktop-icon {
+            position: absolute; width: 90px; text-align: center;
+            animation-iteration-count: infinite; animation-timing-function: ease-in-out;
+            animation-direction: alternate; user-select: none;
+        }
+        .desktop-icon.dragging { animation-play-state: paused; z-index: 100; transform: scale(1.1); }
+        
+        @keyframes float1 { from { transform: translate(0, 0); } to { transform: translate(15px, 20px); } }
+        @keyframes float2 { from { transform: translate(0, 0); } to { transform: translate(-18px, 12px); } }
+        @keyframes float3 { from { transform: translate(0, 0); } to { transform: translate(12px, -15px) rotate(8deg); } }
+        @keyframes float4 { from { transform: translate(0, 0); } to { transform: translate(-10px, -18px) rotate(-8deg); } }
+        @keyframes float5 { 0% { transform: translateY(5px); } 25% { transform: translateX(-5px); } 50% { transform: translateY(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateY(5px); } }
+        @keyframes float6 { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        .desktop-icon:hover { background: rgba(163, 213, 255, 0.7); border-radius: 8px; }
+        .desktop-icon .icon-visual {
+            height: 40px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .desktop-icon .icon-visual img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        .desktop-icon .icon-label {
+            margin-top: 8px; color: #EAEAEA;
+            text-shadow: 1px 1px 0px #111;
+            word-wrap: break-word; font-size: 10px; line-height: 1.4;
+        }
+        .desktop-icon:hover .icon-label { background: rgba(0, 0, 128, 0.7); color: #fff; text-shadow: none; border-radius: 4px; }
+        
+        .starlight-materialize { animation: starlight-materialize 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        @keyframes starlight-materialize { 0% { opacity: 0; transform: scale(0.5); filter: blur(10px) drop-shadow(0 0 20px #fff); } 60% { opacity: 1; filter: blur(2px) drop-shadow(0 0 10px #D4AF37); } 100% { opacity: 1; transform: scale(1); filter: blur(0) drop-shadow(0 0 0px transparent); } }
+
+        /* --- Popups & Video --- */
+        .memory-popup { max-width: 350px; }
+        .popup-visual {
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10px;
+        }
+        .popup-visual img {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+        }
+        .popup-text { line-height: 1.8; text-align: left; }
+
+        /* --- CHECKLIST WINDOW STYLES --- */
+        #checklist-window .window-body {
+            display: flex;
+            flex-direction: column;
+            height: 60vh;
+            max-height: 400px;
+            padding: 0;
+        }
+        #checklist-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
+            box-shadow: inset 2px 2px 2px rgba(0,0,0,0.1);
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        .checklist-item .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #111;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checklist-item .checkbox::before {
+            content: '✓';
+            color: #111;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+        .checklist-item.checked .checkbox::before {
+            display: block;
+        }
+        .checklist-item.checked .item-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        #checklist-input-area {
+            display: flex;
+            padding: 8px;
+            gap: 8px;
+            border-top: 2px solid #111;
+        }
+        #checklist-input {
+            flex-grow: 1;
+            border: 2px solid #111;
+            padding: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+        }
+        #checklist-add-button {
+            padding: 8px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border: 2px solid #111;
+            background: #9BF6FF;
+            cursor: pointer;
+        }
+        
+        /* --- CHAT WINDOW STYLES --- */
+        #chat-window { max-width: 420px; }
+        #chat-window .window-body {
+            display: flex;
+            flex-direction: column;
+            height: 60vh;
+            max-height: 400px;
+            padding: 0;
+        }
+        #username-selection {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 15px; padding: 30px;
+        }
+        .username-button {
+            padding: 12px 24px;
+            font-family: 'Press Start 2P', monospace;
+            border: 2px solid #111;
+            border-radius: 6px;
+            background: #f0f0f0;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 #111;
+            transition: all 0.1s ease-out;
+        }
+        .username-button[data-user="hadik"] { background-color: #FFB3C1; }
+        .username-button[data-user="hadak"] { background-color: #A3D5FF; }
+        .username-button:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 #111;
+        }
+        .username-button:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0 0 0 #111;
+        }
+        #chat-interface { display: none; flex-direction: column; height: 100%; }
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
+            box-shadow: inset 2px 2px 2px rgba(0,0,0,0.1);
+            border-bottom: 2px solid #111;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message {
+            margin-bottom: 8px;
+            line-height: 1.6;
+            padding: 6px 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .chat-message strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 8px;
+            opacity: 0.8;
+        }
+        .chat-message.sent {
+            background-color: #FFB3C1;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .chat-message.received {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+            text-align: left;
+        }
+        #chat-input-area {
+            display: flex;
+            padding: 8px;
+            gap: 8px;
+        }
+        #chat-input {
+            flex-grow: 1;
+            border: 2px solid #111;
+            padding: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+        }
+        #chat-send-button {
+            padding: 8px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border: 2px solid #111;
+            background: #FFB3C1;
+            cursor: pointer;
+        }
+
+        /* --- ENHANCED FINAL POPUP & RETRO AUDIO CONTROLS --- */
+        .final-popup-special { 
+            width: 90%; max-width: 650px; 
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            border: 3px solid #FFB3C1; 
+            box-shadow: 0 0 20px rgba(255, 179, 193, 0.3), 8px 8px 0px #111;
+        }
+        .final-popup-special .title-bar { 
+            background: linear-gradient(90deg, #FFB3C1, #F7D9E3);
+            color: #111; border-color: #111; 
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+        }
+        .final-popup-special .window-body { 
+            background: linear-gradient(135deg, #111 0%, #1a1a1a 100%); 
+            color: #EAEAEA; 
+            border: 2px inset #333;
+        }
+        .final-popup-special .close-button { 
+            border-color: #FFB3C1; 
+            background: #FFB3C1;
+        }
+        
+        #lyric-display {
+            width: 100%; min-height: 100px; display: flex; justify-content: center;
+            align-items: center; text-align: center; font-size: 20px;
+            line-height: 1.7; color: #EAEAEA; margin-bottom: 25px;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a1a);
+            border: 2px inset #333; border-radius: 8px; padding: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .lyric-line { 
+            animation: fadeIn 0.5s forwards; 
+            text-shadow: 0 0 5px rgba(255, 179, 193, 0.3);
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* --- ENHANCED RETRO AUDIO CONTROLS --- */
+        #custom-audio-controls {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; padding: 15px; box-sizing: border-box;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px outset #444; border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        #play-pause-button {
+            font-family: 'Press Start 2P', monospace; font-size: 10px;
+            width: 60px; height: 50px; 
+            border: 3px outset #FFB3C1;
+            background: linear-gradient(135deg, #FFB3C1 0%, #F7D9E3 100%);
+            color: #111; border-radius: 8px;
+            box-shadow: 3px 3px 0 #111, inset 0 0 5px rgba(255,255,255,0.2);
+            transition: all 0.15s ease;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+        }
+        #play-pause-button:hover {
+            background: linear-gradient(135deg, #F7D9E3 0%, #FFB3C1 100%);
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 #111, inset 0 0 5px rgba(255,255,255,0.2);
+        }
+        #play-pause-button:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0 0 0 #111, inset 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        #play-pause-button.playing { 
+            border-style: inset; 
+            background: linear-gradient(135deg, #9BF6FF 0%, #A3D5FF 100%);
+            color: #111;
+        }
+
+        .time-display {
+            background: linear-gradient(135deg, #111 0%, #000 100%); 
+            color: #9BF6FF; padding: 8px 12px;
+            font-size: 10px; 
+            border: 2px inset #000; border-radius: 6px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+            text-shadow: 0 0 3px rgba(155, 246, 255, 0.5);
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            flex-grow: 1; height: 24px; 
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+            border: 2px inset #000; cursor: pointer; border-radius: 6px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.7);
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%; 
+            background: linear-gradient(90deg, #FFB3C1 0%, #F7D9E3 50%, #9BF6FF 100%);
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(255, 179, 193, 0.5);
+            transition: width 0.1s ease;
+        }
+
+        #soundcloud-player-container {
+            position: absolute;
+            left: -9999px; /* Hides the player off-screen */
+        }
+
+        /* --- Enhanced styling for password and birthday windows --- */
+        .riddle em {
+            color: #FF6B9D;
+            font-style: normal;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+        }
+        
+        /* --- MOBILE ADAPTIVE BACKGROUND --- */
+        @media (max-width: 600px) {
+            body {
+                background-size: 15px 15px;
+                background-position: 0 0, 0 7.5px, 7.5px -7.5px, -7.5px 0px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars" id="stars1"></div>
+    <div class="stars" id="stars2"></div>
+    <div class="stars" id="stars3"></div>
+
+    <div id="desktop-wrapper">
+        <div id="desktop-icons-container"></div> 
+        <div class="taskbar">
+            <button class="start-button">Dreams</button>
+            <button id="add-memory-button" class="start-button" style="background-color: #A3D5FF;">+ Memory</button>
+            <div id="taskbar-windows"></div>
+            <div class="clock" id="clock">12:00 PM</div>
+        </div>
+        <div class="window memory-popup" id="memory-popup-template" data-memory-id=""></div>
+        <div class="window final-popup-special" id="final-popup"></div>
+        <div class="window" id="chat-window"></div>
+        <!-- NEW: Checklist Window -->
+        <div class="window" id="checklist-window"></div>
+        <div class="window" id="add-memory-window"></div>
+    </div>
+    <div id="entry-wrapper">
+        <div class="window" id="password-window"></div>
+    </div>
+    <div class="window" id="birthday-popup"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://w.soundcloud.com/player/api.js"></script>
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCC23SltL1DPhTcXdZivR5sAKOc4o2l4K0",
+            authDomain: "manal-hbd.firebaseapp.com",
+            databaseURL: "https://manal-hbd-default-rtdb.firebaseio.com",
+            projectId: "manal-hbd",
+            storageBucket: "manal-hbd.appspot.com",
+            messagingSenderId: "508703969723",
+            appId: "1:508703969723:web:70d5a1775fa0804321b49e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show a loading message
+            const passwordWindow = document.getElementById('password-window');
+            passwordWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">Connecting...</div></div><div class="window-body" style="text-align:center; padding: 30px;">Loading our universe...</div>`;
+
+            // Fetch all content from Firebase
+            database.ref('siteData/content').once('value', (snapshot) => {
+                const content = snapshot.val();
+                if (content) {
+                    initializeApp(content);
+                } else {
+                    passwordWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">Error</div></div><div class="window-body" style="text-align:center; padding: 30px;">Could not load the universe.<br>Please check the connection or Firebase data.</div>`;
+                }
+            }).catch(error => {
+                console.error("Firebase read failed: " + error.message);
+                passwordWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">Error</div></div><div class="window-body" style="text-align:center; padding: 30px;">Connection to our universe failed.</div>`;
+            });
+        });
+
+        function initializeApp(content) {
+
+            // --- Elements ---
+            const entryWrapper = document.getElementById('entry-wrapper');
+            const desktopWrapper = document.getElementById('desktop-wrapper');
+            const passwordWindow = document.getElementById('password-window');
+            const birthdayPopup = document.getElementById('birthday-popup');
+            const memoryPopup = document.getElementById('memory-popup-template');
+            const finalPopup = document.getElementById('final-popup');
+            const chatWindow = document.getElementById('chat-window');
+            const checklistWindow = document.getElementById('checklist-window');
+            const addMemoryWindow = document.getElementById('add-memory-window');
+            
+            // All accepted password variations
+            const validPasswords = [
+                "daydream", "daydreaming", "daydreamin", "daydreamin'", 
+                "daydreamy", "daydreamer", "daydreamers",
+                "Daydream", "Daydreaming", "Daydreamin", "Daydreamin'", 
+                "Daydreamy", "Daydreamer", "Daydreamers", "d"
+            ];
+            
+            function populateWindows(content) {
+                const pw = content.passwordWindow;
+                passwordWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">${pw.title}</div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body"><div class="riddle"><p><em>${pw.riddleTitle}</em></p><p>${pw.riddleBody}</p></div><form id="password-form"><input type="text" id="password-input" placeholder="${pw.inputPlaceholder}" autofocus><div class="error-message" id="error-message">${pw.errorMessage}</div><div style="text-align: right;"><button class="action-button" type="submit">${pw.buttonText}</button></div></form></div>`;
+                
+                const bp = content.birthdayPopup;
+                birthdayPopup.innerHTML = `<div class="title-bar"><div class="title-bar-text">${bp.title}</div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body">${bp.body}<div style="text-align:center; margin-top: 20px;"><button class="action-button" id="enter-universe-button">${bp.buttonText}</button></div></div>`;
+                
+                memoryPopup.innerHTML = `<div class="title-bar"><div class="title-bar-text" id="popup-title"></div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body"><div class="popup-visual"></div><div class="popup-text" id="popup-text"></div></div>`;
+                
+                const fp = content.finalPopup;
+                finalPopup.innerHTML = `<div class="title-bar"><div class="title-bar-text">${fp.title}</div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body"><div id="lyric-display"></div><div id="custom-audio-controls"><button id="play-pause-button">►</button><span id="current-time" class="time-display">0:00</span><div class="progress-bar"><div class="progress-bar-fill"></div></div><span id="total-duration" class="time-display">0:00</span></div><div id="soundcloud-player-container"></div></div>`;
+
+                chatWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">Secret Chat</div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body"><div id="username-selection"><p>Who are you?</p><button class="username-button" data-user="hadak">hadak</button><button class="username-button" data-user="hadik">hadik</button></div><div id="chat-interface"><div id="chat-messages"></div><form id="chat-input-area"><input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off"><button type="submit" id="chat-send-button">Send</button></form></div></div>`;
+                
+                checklistWindow.innerHTML = `<div class="title-bar"><div class="title-bar-text">Secret Checklist</div><div class="title-bar-controls"><button></button><button class="close-button"></button></div></div><div class="window-body"><div id="checklist-items"></div><form id="checklist-input-area"><input type="text" id="checklist-input" placeholder="A new dream..." autocomplete="off"><button type="submit" id="checklist-add-button">Add</button></form></div>`;
+
+                addMemoryWindow.innerHTML = `
+                    <div class="title-bar">
+                        <div class="title-bar-text">Create a New Memory</div>
+                        <div class="title-bar-controls"><button></button><button class="close-button"></button></div>
+                    </div>
+                    <div class="window-body">
+                        <form id="add-memory-form">
+                            <label for="memory-title">Title</label>
+                            <input type="text" id="memory-title" required>
+                            
+                            <label for="memory-text">Text</label>
+                            <textarea id="memory-text" required></textarea>
+                            
+                            <label for="memory-visual">Visual (Image URL)</label>
+                            <input type="text" id="memory-visual" placeholder="https://example.com/image.png" required>
+                            
+                            <div style="text-align: right;"><button class="action-button" type="submit">Create</button></div>
+                        </form>
+                    </div>`;
+            }
+            
+            populateWindows(content);
+
+            const form = document.getElementById('password-form');
+            const passwordInput = document.getElementById('password-input');
+            const errorMessage = document.getElementById('error-message');
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const userInput = passwordInput.value.trim().toLowerCase().replace(/'/g, "");
+                const isValid = validPasswords.some(password => 
+                    userInput === password.replace(/'/g, "")
+                );
+                
+                if (isValid) {
+                    closeWindowWithAnimation(passwordWindow, () => {
+                        openWindowWithAnimation(birthdayPopup);
+                    });
+                } else {
+                    errorMessage.style.display = 'block';
+                    passwordInput.value = '';
+                }
+            });
+            
+            function enterTheUniverse() {
+                closeWindowWithAnimation(birthdayPopup, () => {
+                    entryWrapper.style.display = 'none';
+                    desktopWrapper.style.display = 'block';
+                    initializeDesktop(content);
+                });
+            }
+
+            birthdayPopup.querySelector('.close-button').addEventListener('click', enterTheUniverse);
+            document.getElementById('enter-universe-button').addEventListener('click', enterTheUniverse);
+            
+            document.addEventListener('click', (event) => {
+                if (desktopWrapper.style.display !== 'block') return;
+                const isInteractive = event.target.closest('.window') || event.target.closest('.desktop-icon') || event.target.closest('.taskbar');
+                if (!isInteractive) {
+                    closeAllWindows();
+                }
+            });
+
+            // --- Window Management ---
+            let isDesktopInitialized = false;
+            let memories = Object.values(content.memories || {}); // Pre-populate memories
+            let draggedWindow = null;
+            let draggedIcon = null;
+            let didMove = false;
+            let chatUsername = localStorage.getItem('chatUsername') || null;
+
+            let highestZIndex = 1000;
+
+            function openWindowWithAnimation(win) {
+                // Don't animate the password window on initial load
+                if (win.id === 'password-window' && !isDesktopInitialized) {
+                    win.style.display = 'block';
+                    return;
+                }
+                win.style.display = 'block';
+                win.classList.add('opening');
+                win.addEventListener('animationend', () => {
+                    win.classList.remove('opening');
+                }, { once: true });
+            }
+
+            function closeWindowWithAnimation(win, onClosedCallback) {
+                // Check if the window has been dragged (its transform was cleared by the drag handler)
+                const hasBeenDragged = win.style.transform === 'none';
+                win.classList.add(hasBeenDragged ? 'closing-dragged' : 'closing-centered');
+
+                win.addEventListener('animationend', () => {
+                    win.classList.remove('closing-centered', 'closing-dragged');
+                    win.style.display = 'none'; // Hide it after animation
+
+                    // Reset styles to prevent flicker on reopen. The 'forwards' keyword in the
+                    // animation causes the final state to stick as inline styles.
+                    win.style.opacity = ''; 
+                    // If it was dragged, restore transform: 'none'. Otherwise, clear the inline 
+                    // transform so the CSS class rule for centering applies again.
+                    win.style.transform = hasBeenDragged ? 'none' : '';
+
+                    if (onClosedCallback) {
+                        onClosedCallback();
+                    }
+                }, { once: true });
+            }
+
+            const hideAddMemoryWindow = () => {
+                closeWindowWithAnimation(addMemoryWindow, () => {
+                    const form = document.getElementById('add-memory-form');
+                    if (form) form.reset();
+                });
+            };
+
+            function closeAllWindows() {
+                // Close all individual memory popups
+                document.querySelectorAll('.window.memory-popup').forEach(win => {
+                    // Don't remove the template itself, which is identified by its original ID
+                    if (win.id !== 'memory-popup-template') {
+                        const tab = document.querySelector(`.taskbar-tab[data-memory-id="${win.dataset.memoryId}"]`);
+                        closeWindowWithAnimation(win, () => {
+                            win.remove();
+                            if (tab) tab.remove();
+                        });
+                    }
+                });
+                // Remove all associated taskbar tabs (this part is now handled above)
+                document.querySelectorAll('#taskbar-windows .taskbar-tab[data-memory-id]').forEach(tab => {
+                    tab.remove();
+                });
+                if (finalPopup.style.display === 'block') hideFinalPopup();
+                if (chatWindow.style.display === 'block') hideChatWindow();
+                if (checklistWindow.style.display === 'block') hideChecklistWindow();
+                if (addMemoryWindow.style.display === 'block') hideAddMemoryWindow();
+            }
+            
+            function hideFinalPopup() {
+                closeWindowWithAnimation(finalPopup, () => {
+                    stopLyricEngine();
+                    if (soundcloudWidget) soundcloudWidget.pause();
+                });
+            }
+
+            function hideChatWindow() {
+                closeWindowWithAnimation(chatWindow);
+            }
+
+            function hideChecklistWindow() {
+                closeWindowWithAnimation(checklistWindow);
+            }
+
+            // --- Checklist ---
+            function initializeChecklist() {
+                const startButton = document.querySelector('.start-button');
+                const itemsContainer = document.getElementById('checklist-items');
+                const addForm = document.getElementById('checklist-input-area');
+                const addInput = document.getElementById('checklist-input');
+
+                checklistWindow.querySelector('.close-button').addEventListener('click', hideChecklistWindow);
+
+                startButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent desktop click-off from closing it immediately
+                    if (checklistWindow.style.display === 'block') {
+                        hideChecklistWindow();
+                    } else {
+                        openWindowWithAnimation(checklistWindow);
+                        highestZIndex++;
+                        checklistWindow.style.zIndex = highestZIndex;
+                    }
+                });
+
+                addForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const text = addInput.value.trim();
+                    if (text) {
+                        database.ref('checklist').push({
+                            text: text,
+                            checked: false,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        addInput.value = '';
+                    }
+                });
+
+                itemsContainer.addEventListener('click', (e) => {
+                    const itemElement = e.target.closest('.checklist-item');
+                    if (itemElement) {
+                        const key = itemElement.dataset.key;
+                        const isChecked = itemElement.classList.contains('checked');
+                        database.ref('checklist').child(key).update({ checked: !isChecked });
+                    }
+                });
+
+                const checklistRef = database.ref('checklist').orderByChild('timestamp');
+
+                checklistRef.on('child_added', (snapshot) => {
+                    const itemData = snapshot.val();
+                    const key = snapshot.key;
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('checklist-item');
+                    if (itemData.checked) {
+                        itemElement.classList.add('checked');
+                    }
+                    itemElement.dataset.key = key;
+                    itemElement.innerHTML = `<div class="checkbox"></div><span class="item-text">${itemData.text}</span>`;
+                    itemsContainer.appendChild(itemElement);
+                });
+
+                checklistRef.on('child_changed', (snapshot) => {
+                    const itemData = snapshot.val();
+                    const key = snapshot.key;
+                    const itemElement = itemsContainer.querySelector(`[data-key="${key}"]`);
+                    if (itemElement) {
+                        itemElement.classList.toggle('checked', itemData.checked);
+                    }
+            });
+
+            checklistRef.on('child_removed', (snapshot) => {
+                const key = snapshot.key;
+                const itemElement = itemsContainer.querySelector(`[data-key="${key}"]`);
+                if (itemElement) {
+                    itemElement.remove();
+                }
+                });
+            }
+            
+            // --- Chat ---
+            function initializeChat() {
+                const clock = document.getElementById('clock');
+                const usernameSelection = document.getElementById('username-selection');
+                const chatInterface = document.getElementById('chat-interface');
+                const chatMessages = document.getElementById('chat-messages');
+                const chatInputForm = document.getElementById('chat-input-area');
+                const chatInput = document.getElementById('chat-input');
+
+                chatWindow.querySelector('.close-button').addEventListener('click', hideChatWindow);
+
+                clock.addEventListener('click', () => {
+                    highestZIndex++;
+                    chatWindow.style.zIndex = highestZIndex;
+                    openWindowWithAnimation(chatWindow);
+                    
+                    const showChat = () => {
+                        usernameSelection.style.display = 'none';
+                        chatInterface.style.display = 'flex';
+                        setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 0);
+                        chatInput.focus();
+                    };
+
+                    if (!chatUsername) {
+                        usernameSelection.style.display = 'flex';
+                        chatInterface.style.display = 'none';
+                    } else {
+                        showChat();
+                    }
+                });
+
+                usernameSelection.querySelectorAll('.username-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        chatUsername = button.dataset.user;
+                        localStorage.setItem('chatUsername', chatUsername);
+                        usernameSelection.style.display = 'none';
+                        chatInterface.style.display = 'flex';
+                        setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 0);
+                        chatInput.focus();
+                    });
+                });
+
+                chatInputForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const messageText = chatInput.value.trim();
+                    if (messageText && chatUsername) {
+                        database.ref('messages').push({
+                            username: chatUsername,
+                            text: messageText,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        chatInput.value = '';
+                    }
+                });
+
+                const messagesRef = database.ref('messages').orderByChild('timestamp');
+                messagesRef.on('child_added', (snapshot) => {
+                    const message = snapshot.val();
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('chat-message');
+                    messageDiv.classList.add(message.username === chatUsername ? 'sent' : 'received');
+                    messageDiv.innerHTML = `<strong>${message.username}</strong><span>${message.text}</span>`;
+                    chatMessages.appendChild(messageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+                
+                if (chatUsername) {
+                    usernameSelection.style.display = 'none';
+                    chatInterface.style.display = 'flex';
+                }
+            }
+            
+            function initializeDesktop(content) {
+                if (isDesktopInitialized) return;
+                isDesktopInitialized = true;
+                
+                function updateClock() {
+                    const clockElement = document.getElementById('clock');
+                    const now = new Date(); let hours = now.getHours();
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM'; hours = hours % 12; hours = hours ? hours : 12;
+                    clockElement.textContent = `${hours}:${minutes} ${ampm}`;
+                }
+                setInterval(updateClock, 1000); updateClock();
+
+                // Create icons for the memories we already fetched on initial load
+                memories.forEach(memory => createIcon(memory, false));
+
+                // Listen for memories in real-time. This will also load existing ones.
+                const memoriesRef = database.ref('siteData/content/memories');
+                memoriesRef.on('child_added', (snapshot) => {
+                    const memoryData = snapshot.val();
+                    if (memoryData) {
+                        // Check if icon already exists to prevent duplicates
+                        if (!document.querySelector(`.desktop-icon[data-memory-id="${memoryData.id}"]`)) {
+                            // Add to local array if it's not already there
+                            if (!memories.some(m => m.id === memoryData.id)) {
+                                memories.push(memoryData);
+                            }
+                            createIcon(memoryData, true);
+                        }
+                    }
+                });
+
+                memoriesRef.on('child_removed', (snapshot) => {
+                    const memoryData = snapshot.val();
+                    if (memoryData) {
+                        // Remove from local array
+                        memories = memories.filter(m => m.id !== memoryData.id);
+                        // Remove icon from DOM
+                        const iconToRemove = document.querySelector(`.desktop-icon[data-memory-id="${memoryData.id}"]`);
+                        if (iconToRemove) {
+                            iconToRemove.remove();
+                        }
+                        // Remove taskbar tab if it exists
+                        const tabToRemove = document.querySelector(`.taskbar-tab[data-memory-id="${memoryData.id}"]`);
+                        if (tabToRemove) {
+                            tabToRemove.remove();
+                        }
+                    }
+                });
+
+                // Create the "Our Song" icon right from the start
+                const finalSongIconData = content.finalPopup.reopenIcon;
+                if (finalSongIconData) {
+                    if (!document.querySelector(`.desktop-icon[data-memory-id="${finalSongIconData.id}"]`)) {
+                        finalSongIconData.position = { top: '75%', left: '50%' };
+                        createIcon(finalSongIconData, false);
+                    }
+                }
+
+                initializeSoundCloudPlayer();
+                initializeChat();
+                initializeChecklist();
+                initializeMemoryCreator();
+            }
+
+            function initializeMemoryCreator() {
+                const addMemoryButton = document.getElementById('add-memory-button');
+                const addMemoryWindow = document.getElementById('add-memory-window');
+                const addMemoryForm = document.getElementById('add-memory-form');
+                const addMemoryCloseButton = addMemoryWindow.querySelector('.close-button');
+
+                addMemoryButton.addEventListener('click', () => {
+                    openWindowWithAnimation(addMemoryWindow);
+                    highestZIndex++;
+                    addMemoryWindow.style.zIndex = highestZIndex;
+                });
+
+                addMemoryCloseButton.addEventListener('click', hideAddMemoryWindow);
+
+                addMemoryForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const title = document.getElementById('memory-title').value.trim();
+                    const text = document.getElementById('memory-text').value.trim();
+                    const visualUrl = document.getElementById('memory-visual').value.trim();
+
+                    if (!title || !text || !visualUrl) {
+                        alert('Please fill out all fields.');
+                        return;
+                    }
+
+                    // Find the highest existing ID to create a new unique one, excluding the special song ID
+                    const maxId = Math.max(0, ...memories.map(m => m.id).filter(id => id < 999));
+                    const newId = maxId + 1;
+
+                    // Generate a random position
+                    const randomTop = Math.floor(Math.random() * 70) + 10; // 10% to 80%
+                    const randomLeft = Math.floor(Math.random() * 85) + 5;  // 5% to 90%
+
+                    const newMemory = {
+                        id: newId,
+                        title: title,
+                        text: `<p>${text.replace(/\n/g, '<br>')}</p>`, // Convert newlines to <br>
+                        visual: `<img src="${visualUrl}" alt="${title}">`,
+                        position: {
+                            top: `${randomTop}%`,
+                            left: `${randomLeft}%`
+                        }
+                    };
+
+                    // Push to Firebase using the new ID as the key. The listener will create the icon.
+                    database.ref(`siteData/content/memories/${newId}`).set(newMemory)
+                        .then(() => {
+                            console.log('Memory added successfully!');
+                            hideAddMemoryWindow();
+                        })
+                        .catch((error) => {
+                            console.error('Error adding memory: ', error);
+                            alert('Failed to add memory. Please try again.');
+                        });
+                });
+            }
+            
+            function addDragListeners(iconDiv) {
+                iconDiv.addEventListener('mousedown', dragStart);
+                iconDiv.addEventListener('touchstart', dragStart, { passive: true });
+            }
+            
+            function createIcon(memory, isNew = false) {
+                const iconsContainer = document.getElementById('desktop-icons-container');
+                const iconDiv = document.createElement('div');
+                
+                iconDiv.style.top = memory.position.top;
+                iconDiv.style.left = memory.position.left;
+                
+                // New memories get a special animation
+                if (isNew) {
+                    iconDiv.className = 'desktop-icon starlight-materialize';
+                } 
+                // The "Our Song" icon should be static but centered
+                else if (memory.id === 999) {
+                    iconDiv.className = 'desktop-icon';
+                    iconDiv.style.transform = 'translateX(-50%)';
+                }
+                // Other icons get a floating animation
+                else {
+                    iconDiv.className = 'desktop-icon';
+                    const animations = ['float1', 'float2', 'float3', 'float4', 'float5', 'float6'];
+                    const timings = ['ease', 'ease-in-out', 'linear'];
+                    const directions = ['normal', 'reverse'];
+                    const randomAnimationName = animations[Math.floor(Math.random() * animations.length)];
+                    const randomDuration = Math.random() * 20 + 15;
+                    const randomTiming = timings[Math.floor(Math.random() * timings.length)];
+                    const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                    iconDiv.style.animationName = randomAnimationName;
+                    iconDiv.style.animationDuration = `${randomDuration}s`;
+                    iconDiv.style.animationTimingFunction = randomTiming;
+                    iconDiv.style.animationDirection = randomDirection;
+                }
+                
+                iconDiv.innerHTML = `<div class="icon-visual">${memory.visual}</div><div class="icon-label">${memory.title}</div>`;
+                iconDiv.dataset.memoryId = memory.id;
+                
+                addDragListeners(iconDiv);
+                
+                iconsContainer.appendChild(iconDiv);
+            }
+
+            function dragStart(e) {
+                draggedIcon = e.target.closest('.desktop-icon');
+                if (!draggedIcon) return;
+                didMove = false;
+                const event = e.touches ? e.touches[0] : e;
+                const rect = draggedIcon.getBoundingClientRect();
+                dragOffsetX = event.clientX - rect.left;
+                dragOffsetY = event.clientY - rect.top;
+                draggedIcon.classList.add('dragging');
+            }
+
+            function dragMove(e) { 
+                const elementToDrag = draggedIcon || draggedWindow;
+                if (!elementToDrag) return;
+
+                e.preventDefault(); 
+                didMove = true;
+                const event = e.touches ? e.touches[0] : e;
+                let newX = event.clientX - dragOffsetX;
+                let newY = event.clientY - dragOffsetY;
+                elementToDrag.style.left = `${newX}px`;
+                elementToDrag.style.top = `${newY}px`;
+            }
+
+            function dragEnd() {
+                if (draggedWindow) {
+                    draggedWindow.classList.remove('dragging');
+                    draggedWindow = null;
+                }
+
+                if (!draggedIcon) return;
+
+                draggedIcon.classList.remove('dragging');
+                if (!didMove) {
+                    const memoryId = parseInt(draggedIcon.dataset.memoryId);
+                    if (memoryId === 999) {
+                        showFinalPopup();
+                    } else {
+                        const memory = memories.find(m => m.id === memoryId);
+                        if (memory) { openMemoryPopup(memory); }
+                    }
+                }
+                draggedIcon = null;
+            }
+            
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('touchmove', dragMove, { passive: false });
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+
+            // Add event listener for window dragging
+            document.addEventListener('mousedown', (e) => {
+                // We only care about the main mouse button for dragging
+                if (e.button !== 0) return;
+
+                const titleBar = e.target.closest('.title-bar');
+                if (titleBar && e.target.tagName !== 'BUTTON') {
+                    draggedWindow = titleBar.closest('.window');
+                    if (!draggedWindow) return;
+
+                    // --- THE FIX ---
+                    // If the window is centered via transform, convert its position to top/left pixels before dragging.
+                    // This prevents the "jump" on the first drag.
+                    const computedStyle = window.getComputedStyle(draggedWindow);
+                    if (computedStyle.transform !== 'none') {
+                        const rect = draggedWindow.getBoundingClientRect();
+                        draggedWindow.style.left = `${rect.left}px`;
+                        draggedWindow.style.top = `${rect.top}px`;
+                        draggedWindow.style.transform = 'none';
+                    }
+                    // --- END FIX ---
+
+                    didMove = false;
+                    const rect = draggedWindow.getBoundingClientRect();
+                    dragOffsetX = e.clientX - rect.left;
+                    dragOffsetY = e.clientY - rect.top;
+                    draggedWindow.classList.add('dragging');
+                }
+            });
+
+            // Add event listener to all windows to bring them to front on click
+            document.querySelectorAll('.window').forEach(windowEl => {
+                windowEl.addEventListener('mousedown', () => {
+                    highestZIndex++;
+                    windowEl.style.zIndex = highestZIndex;
+                });
+            });
+
+            function openMemoryPopup(memory) {
+                // Check if a window for this memory already exists
+                const existingWindow = document.querySelector(`.window.memory-popup[data-memory-id="${memory.id}"]`);
+                if (existingWindow) {
+                    // If it exists, just bring it to the front
+                    openWindowWithAnimation(existingWindow);
+                    highestZIndex++;
+                    existingWindow.style.zIndex = highestZIndex;
+                    document.querySelectorAll('.taskbar-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector(`.taskbar-tab[data-memory-id="${memory.id}"]`)?.classList.add('active');
+                    return;
+                }
+
+                // If it doesn't exist, create a new one by cloning the template
+                const newMemoryWindow = memoryPopup.cloneNode(true);
+
+                // Configure the new window
+                newMemoryWindow.id = `memory-window-${memory.id}`; // Give it a unique ID
+                newMemoryWindow.dataset.memoryId = memory.id;
+                newMemoryWindow.querySelector('.title-bar-text').textContent = memory.title;
+                newMemoryWindow.querySelector('.popup-text').innerHTML = memory.text;
+                newMemoryWindow.querySelector('.popup-visual').innerHTML = memory.visual;
+
+                // Position the new window with a cascading offset to avoid perfect stacking
+                const openWindows = document.querySelectorAll('.window.memory-popup[id^="memory-window-"]').length;
+                const offset = openWindows * 20;
+                newMemoryWindow.style.left = `calc(50% + ${offset}px)`;
+                newMemoryWindow.style.top = `calc(50% + ${offset}px)`;
+
+                // Add to DOM and set z-index
+                desktopWrapper.appendChild(newMemoryWindow);
+                highestZIndex++;
+                openWindowWithAnimation(newMemoryWindow);
+                newMemoryWindow.style.zIndex = highestZIndex;
+
+                // Handle taskbar tab creation and state
+                let tab = document.querySelector(`.taskbar-tab[data-memory-id="${memory.id}"]`);
+                if (!tab) {
+                    tab = document.createElement('div');
+                    tab.className = 'taskbar-tab';
+                    tab.dataset.memoryId = memory.id;
+                    tab.innerHTML = `<div class="icon-visual">${memory.visual}</div>`;
+                    tab.addEventListener('click', (e) => { e.stopPropagation(); openMemoryPopup(memory); }); // Click tab to focus/reopen
+                    document.getElementById('taskbar-windows').appendChild(tab);
+                }
+                document.querySelectorAll('.taskbar-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Add close functionality specifically for this new window
+                newMemoryWindow.querySelector('.close-button').addEventListener('click', () => {
+                    closeWindowWithAnimation(newMemoryWindow, () => {
+                        newMemoryWindow.remove();
+                        if (tab) tab.remove(); // Also remove the taskbar tab
+                    });
+                });
+            }
+
+            function showFinalPopup() {
+                // The lyrics are now fetched from Firebase content
+                openWindowWithAnimation(finalPopup);
+                const lyrics = content.lyrics || [];
+                highestZIndex++;
+                finalPopup.style.zIndex = highestZIndex;
+                startLyricEngine();
+                if (soundcloudWidget) {
+                    soundcloudWidget.play();
+                }
+            }
+            
+            finalPopup.querySelector('.close-button').addEventListener('click', hideFinalPopup);
+
+
+            // --- SOUNDCLOUD LYRIC ENGINE ---
+            let soundcloudWidget;
+            let lyricInterval;
+
+            function startLyricEngine() {
+                if (lyricInterval) clearInterval(lyricInterval); 
+                
+                const lyricDisplay = document.getElementById('lyric-display');
+                const progressBarFill = document.querySelector('.progress-bar-fill');
+                const currentTimeEl = document.getElementById('current-time');
+                const totalDurationEl = document.getElementById('total-duration');
+                let totalDuration = 0;
+                let currentLyric = '';
+
+                soundcloudWidget.getDuration((duration) => {
+                    totalDuration = duration / 1000;
+                    totalDurationEl.textContent = formatTime(totalDuration);
+                });
+
+                lyricInterval = setInterval(() => {
+                    if (!soundcloudWidget || !totalDuration) return;
+                    soundcloudWidget.getPosition((position) => {
+                        const currentTime = position / 1000;
+                        
+                        currentTimeEl.textContent = formatTime(currentTime);
+                        const lyrics = content.lyrics || [];
+                        const progressPercent = (currentTime / totalDuration) * 100;
+                        progressBarFill.style.width = `${progressPercent}%`;
+
+                        const activeLyric = lyrics.find(lyric => currentTime >= lyric.start && currentTime <= lyric.end);
+                        if (activeLyric) {
+                            if (currentLyric !== activeLyric.text) {
+                                currentLyric = activeLyric.text;
+                                lyricDisplay.innerHTML = `<span class="lyric-line">${currentLyric}</span>`;
+                            }
+                        } else if (currentLyric !== '') {
+                            currentLyric = '';
+                            lyricDisplay.innerHTML = '';
+                        }
+                    });
+                }, 100);
+            }
+
+            function stopLyricEngine() {
+                if (lyricInterval) {
+                    clearInterval(lyricInterval);
+                    lyricInterval = null;
+                }
+            }
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            function initializeSoundCloudPlayer() {
+                const playerContainer = document.getElementById('soundcloud-player-container');
+                const trackUrl = 'https://soundcloud.com/amine-elmoufid-642633107/hbd_1';
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.id = 'sc-widget';
+                iframe.allow = "autoplay";
+                iframe.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(trackUrl)}`;
+                playerContainer.appendChild(iframe);
+
+                soundcloudWidget = SC.Widget(iframe);
+                const playPauseBtn = document.getElementById('play-pause-button');
+                const progressBar = document.querySelector('.progress-bar');
+                let totalDurationMs = 0;
+                
+                soundcloudWidget.bind(SC.Widget.Events.READY, () => {
+                    soundcloudWidget.getDuration((duration) => {
+                        totalDurationMs = duration;
+                        document.getElementById('total-duration').textContent = formatTime(duration / 1000);
+                    });
+                });
+
+                playPauseBtn.addEventListener('click', () => {
+                    soundcloudWidget.toggle();
+                });
+
+                soundcloudWidget.bind(SC.Widget.Events.PLAY, () => {
+                    playPauseBtn.textContent = '❚❚';
+                    playPauseBtn.classList.add('playing');
+                    startLyricEngine();
+                });
+
+                soundcloudWidget.bind(SC.Widget.Events.PAUSE, () => {
+                    playPauseBtn.textContent = '►';
+                    playPauseBtn.classList.remove('playing');
+                    stopLyricEngine();
+                });
+
+                soundcloudWidget.bind(SC.Widget.Events.FINISH, () => {
+                    playPauseBtn.textContent = '►';
+                    playPauseBtn.classList.remove('playing');
+                    stopLyricEngine();
+                });
+
+                progressBar.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const percentage = clickX / rect.width;
+                    if(totalDurationMs > 0) {
+                        soundcloudWidget.seekTo(percentage * totalDurationMs);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
